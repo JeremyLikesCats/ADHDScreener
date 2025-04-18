@@ -87,12 +87,8 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
         // Face tracking config!
         let config = ARFaceTrackingConfiguration()
         session.run(config)
-        
-        
-        
+
         print("Initialized!")
-        
-        
     }
     
     public func session(_ session: ARSession, didUpdate frame: ARFrame) {
@@ -100,8 +96,6 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
     }
     
     public func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
-        
-        
         guard let faceAnchor = session.currentFrame?.anchors.compactMap({$0 as? ARFaceAnchor}).first else {
             return
         }
@@ -114,7 +108,6 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
         if (calibrating) {
             calibrate(eyePosition: eyePosition, calibration_step: calibrating_step)
         }
-        
     }
     
     public func pauseSession() {
@@ -154,7 +147,6 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
             screenY = Float(height) - ((transformedLookAtPoint.y / (Float(height) / 2)) * Float(height) * Float(height))
             
         } 
-
         
         var focusPoint = CGPoint()
 
@@ -256,13 +248,11 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
             print(self.bottom_left_multiplier)
             break
             
-            
         case 4:
             self.top_left_multiplier.x = abs(width / ((width / 2) - average.x)) / 2
             self.top_left_multiplier.y = abs(height / ((height / 2) - average.y)) / 2
             print(self.top_left_multiplier)
             break
-            
         
         case 5:
             self.top_right_multiplier.x = abs(width / ((average.x) - (width / 2))) / 2
@@ -287,22 +277,22 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
     }
     
     func detectWink(faceAnchor: ARFaceAnchor) {
-            
+        let blinkThreshold = 0.75
         let blendShapes = faceAnchor.blendShapes
         
         if let leftEyeBlink = blendShapes[.eyeBlinkLeft] as? Float,
            let rightEyeBlink = blendShapes[.eyeBlinkRight] as? Float {
-            if leftEyeBlink > 0.75 && rightEyeBlink > 0.75 {
+            if leftEyeBlink > blinkThreshold && rightEyeBlink > blinkThreshold {
                 
                 if !self.isWinking {
                     self.blinkCount += 1
                 }
                 
-                self.isWinking = true
+                self.isWinking = false
                 
             } else {
                 
-                self.isWinking = false
+                self.isWinking = true
                 
             }
         }
@@ -338,7 +328,6 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
         
         for (index, data) in converted.enumerated() {
             
-            
             let velocity_threshold = average_velocity * 6
             let displacement_threshold = 0.1
             
@@ -356,9 +345,7 @@ public class EyeTrackARView: ARView, ARSessionDelegate, ObservableObject {
     }
     
     func returnData() -> [EyePosition] {
-        
         var eye_positions: [EyePosition] = []
-        
         
         for index in 0..<raw_positions.count {
             eye_positions.append(EyePosition(timestamp: timestamps[index], x: Float(width - raw_positions[index].x), y: Float(height - raw_positions[index].y)))
